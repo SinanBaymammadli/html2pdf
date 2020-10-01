@@ -36,17 +36,23 @@ export const getOptions = async (isDev) => {
 };
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const html = req.body.html;
+  try {
+    const html = req.body.html;
 
-  const options = await getOptions(isDev);
-  const browser = await puppeteer.launch(options);
-  const page = await browser.newPage();
-  await page.setContent(html);
-  const buffer = await page.pdf();
+    const options = await getOptions(isDev);
+    const browser = await puppeteer.launch(options);
+    const page = await browser.newPage();
+    await page.setContent(html);
+    const buffer = await page.pdf();
 
-  await browser.close();
+    await browser.close();
 
-  return res.json({
-    pdf: buffer.toString("base64"),
-  });
+    res.json({
+      pdf: buffer.toString("base64"),
+    });
+  } catch (error) {
+    res.status(400).json({
+      error,
+    });
+  }
 };
